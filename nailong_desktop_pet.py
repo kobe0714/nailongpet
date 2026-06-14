@@ -43,7 +43,7 @@ FRAME_CONFIG = {
 class FrameCache:
     """预提取 spritesheet 全部帧到内存，每帧存 (PIL.Image, duration_ms)"""
 
-    def __init__(self, spritesheet_path, display_w, display_h):
+    def __init__(self, spritesheet_path, display_w, display_h, alpha_threshold=128):
         sheet = Image.open(spritesheet_path).convert("RGBA")
         self.frames = {}  # {state_name: [(PIL.Image, duration_ms), ...]}
         for state, cfg in FRAME_CONFIG.items():
@@ -55,8 +55,17 @@ class FrameCache:
                 y = row * FRAME_H
                 frame = sheet.crop((x, y, x + FRAME_W, y + FRAME_H))
                 frame.thumbnail((display_w, display_h), Image.LANCZOS)
+                frame = self._clean_alpha(frame, alpha_threshold)
                 state_frames.append((frame, dur))
             self.frames[state] = state_frames
+
+    @staticmethod
+    def _clean_alpha(img, threshold):
+        """二值化 alpha 通道，消除半透明边缘，防止 chroma-key 绿边。"""
+        alpha = img.getchannel('A')
+        alpha = alpha.point(lambda x: 255 if x >= threshold else 0)
+        img.putalpha(alpha)
+        return img
 
     def get(self, state):
         return self.frames.get(state, [])
