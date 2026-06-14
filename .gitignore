@@ -1,0 +1,8 @@
+dist/
+build/
+__pycache__/
+*.pyc
+*.pyo
+gifs/
+nailong_desktop_pet_old.py
+*.spec.bak
