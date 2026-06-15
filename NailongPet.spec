@@ -5,7 +5,7 @@ a = Analysis(
     ['nailong_desktop_pet.py'],
     pathex=[],
     binaries=[],
-    datas=[('spritesheet.webp', '.'), ('music.mp3', '.')],
+    datas=[('spritesheet.webp', '.'), ('Banda AK-47 - 我是奶龙（星光闪闪）.flac', '.')],
     hiddenimports=['PIL', 'pygame'],
     hookspath=[],
     hooksconfig={},

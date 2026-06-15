@@ -11,6 +11,7 @@ import random
 import math
 import sys
 import os
+import time
 
 
 def resource_path(relative_path):
@@ -204,6 +205,7 @@ class NailongPet:
         self._drag_oy = 0
         self._drag_vx = 0
         self._drag_vy = 0
+        self._last_click_time = 0
         self.pet_count = 0
         self.GRAVITY = 1.2
         self.MAX_FALL_SPEED = 18
@@ -219,9 +221,10 @@ class NailongPet:
         self._audio_on = True
         try:
             pygame.mixer.init()
-            music_path = resource_path("music.mp3")
+            music_path = resource_path("Banda AK-47 - 我是奶龙（星光闪闪）.flac")
             if os.path.exists(music_path):
                 pygame.mixer.music.load(music_path)
+                pygame.mixer.music.set_volume(0.3)
                 pygame.mixer.music.play(-1)
             else:
                 self._audio_on = False
@@ -229,6 +232,13 @@ class NailongPet:
             self._audio_on = False
 
     def _on_mouse_down(self, event):
+        now = time.time()
+        if now - self._last_click_time < 0.4:
+            self._last_click_time = 0
+            self.dragging = False
+            self._do_pet()
+            return
+        self._last_click_time = now
         self.dragging = True
         self._drag_ox = event.x
         self._drag_oy = event.y
@@ -259,6 +269,12 @@ class NailongPet:
             self._schedule_state_change()
 
     def _on_double_click(self, event):
+        if self._last_click_time == 0:
+            return
+        self._last_click_time = 0
+        self._do_pet()
+
+    def _do_pet(self):
         self.pet_count += 1
         cx = self.x + self.win_w // 2
         cy = self.y + self.win_h // 4
@@ -448,8 +464,8 @@ class NailongPet:
         self.menu.add_command(label="  招手", command=lambda: self._force_state(self.ST_WAVE))
         self.menu.add_command(label="  等待", command=lambda: self._force_state(self.ST_WAIT))
         self.menu.add_separator()
-        self._pet_menu_idx = self.menu.index("end")
         self.menu.add_command(label="  被摸: 0 次", state="disabled")
+        self._pet_menu_idx = self.menu.index("end")
         self.menu.add_command(label="  音效: 开", command=self._toggle_audio)
         self._audio_menu_idx = self.menu.index("end")
         self.menu.add_separator()
